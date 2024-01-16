@@ -1,0 +1,560 @@
+[
+    {
+        "id": "c8c78f4d.679e8",
+        "type": "subflow",
+        "name": "csvColumnParser",
+        "info": "",
+        "category": "",
+        "in": [
+            {
+                "x": 70,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "a8857356.d49e68"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 900,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "d71e0bef.46647",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": []
+    },
+    {
+        "id": "a8857356.d49e68",
+        "type": "csv",
+        "z": "c8c78f4d.679e8",
+        "name": "",
+        "sep": ",",
+        "hdrin": true,
+        "hdrout": "",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": false,
+        "include_null_values": false,
+        "x": 200,
+        "y": 80,
+        "wires": [
+            [
+                "d12b5d18.58218"
+            ]
+        ]
+    },
+    {
+        "id": "3b501c89.fa554c",
+        "type": "split",
+        "z": "c8c78f4d.679e8",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "topic",
+        "x": 540,
+        "y": 80,
+        "wires": [
+            [
+                "6dad6ed9.c91f08"
+            ]
+        ]
+    },
+    {
+        "id": "6dad6ed9.c91f08",
+        "type": "function",
+        "z": "c8c78f4d.679e8",
+        "name": "",
+        "func": "if (!context.results) context.results = {}\n\nif (!context.results[msg.topic]) context.results[msg.topic] = []\ncontext.results[msg.topic].push(msg.payload)\nmsg.payload = context.results\n\nif ((msg.originalParts.index === msg.originalParts.count - 1) && (msg.parts.index === msg.parts.count - 1)) {\n    msg.payload = context.results\n    context.results = {}\n    return msg\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 80,
+        "wires": [
+            [
+                "d71e0bef.46647"
+            ]
+        ]
+    },
+    {
+        "id": "d12b5d18.58218",
+        "type": "change",
+        "z": "c8c78f4d.679e8",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "originalParts",
+                "pt": "msg",
+                "to": "parts",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 370,
+        "y": 80,
+        "wires": [
+            [
+                "3b501c89.fa554c"
+            ]
+        ]
+    },
+    {
+        "id": "d71e0bef.46647",
+        "type": "change",
+        "z": "c8c78f4d.679e8",
+        "name": "spread",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "$spread(payload)",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 780,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a0e3114f954ca3f3",
+        "type": "tab",
+        "label": "Ground Truth + Prediction",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "c8a73d3b9adda42f",
+        "type": "join",
+        "z": "a0e3114f954ca3f3",
+        "name": "Join",
+        "mode": "custom",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": true,
+        "timeout": "",
+        "count": "3",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 1510,
+        "y": 460,
+        "wires": [
+            [
+                "ae5fe2e1a0e636d4"
+            ]
+        ]
+    },
+    {
+        "id": "3bd930ece70d12c0",
+        "type": "file in",
+        "z": "a0e3114f954ca3f3",
+        "name": "Ground Truth",
+        "filename": "payload",
+        "filenameType": "msg",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "utf8",
+        "allProps": false,
+        "x": 1170,
+        "y": 380,
+        "wires": [
+            [
+                "be04b8ed366e9a1b"
+            ]
+        ]
+    },
+    {
+        "id": "3b67bfa5430a205a",
+        "type": "file in",
+        "z": "a0e3114f954ca3f3",
+        "name": "Prediction",
+        "filename": "payload",
+        "filenameType": "msg",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 1160,
+        "y": 460,
+        "wires": [
+            [
+                "be04b8ed366e9a1b"
+            ]
+        ]
+    },
+    {
+        "id": "8144e5a7ca866306",
+        "type": "file in",
+        "z": "a0e3114f954ca3f3",
+        "name": "Timestamps",
+        "filename": "payload",
+        "filenameType": "msg",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 1170,
+        "y": 540,
+        "wires": [
+            [
+                "be04b8ed366e9a1b"
+            ]
+        ]
+    },
+    {
+        "id": "be04b8ed366e9a1b",
+        "type": "subflow:c8c78f4d.679e8",
+        "z": "a0e3114f954ca3f3",
+        "name": "CSV Parser",
+        "x": 1350,
+        "y": 460,
+        "wires": [
+            [
+                "c8a73d3b9adda42f"
+            ]
+        ]
+    },
+    {
+        "id": "ae5fe2e1a0e636d4",
+        "type": "function",
+        "z": "a0e3114f954ca3f3",
+        "name": "set_series",
+        "func": "let ground_truth = Object.values(msg.payload[\"Person\"][1]);\nlet prediction = Object.values(msg.payload[\"0\"]);\nlet timestamps = Object.values(msg.payload[\"Time\"][1][\"Time\"]);\n\nmsg.topic = \"Ground Truth\"\n\n/**\n * To fill more timesteamps on the chart,\n * we round the values to the second decimal place\n */\ntimestamps = timestamps.map(timestamp => {\n   return Math.floor((parseFloat(timestamp) * 100)) / 100;\n});\n\n/**\n * This is the object structure needed for the Chart node\n */\nmsg.payload = [\n    {\n        \"series\": [\"Ground Truth\", \"Prediction\"],\n        \"data\": [\n            ground_truth[0],\n            prediction[0]\n        ],\n        \"labels\": timestamps\n    }\n];\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1660,
+        "y": 460,
+        "wires": [
+            [
+                "94fb490962e07cc6"
+            ]
+        ]
+    },
+    {
+        "id": "94fb490962e07cc6",
+        "type": "ui_chart",
+        "z": "a0e3114f954ca3f3",
+        "name": "GT + Prediction",
+        "group": "53349609cb094d6c",
+        "order": 3,
+        "width": "15",
+        "height": "7",
+        "label": "",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "auto",
+        "interpolate": "linear",
+        "nodata": "Loading...",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "1",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1eb343",
+            "#2c28e6",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1980,
+        "y": 460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b0985568df884e8b",
+        "type": "ui_button",
+        "z": "a0e3114f954ca3f3",
+        "name": "",
+        "group": "53349609cb094d6c",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Reset",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "red",
+        "className": "",
+        "icon": "",
+        "payload": "[]",
+        "payloadType": "json",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 650,
+        "y": 120,
+        "wires": [
+            [
+                "94fb490962e07cc6",
+                "cf39822502e5261b"
+            ]
+        ]
+    },
+    {
+        "id": "d0db6e5ae65d43a7",
+        "type": "ui_button",
+        "z": "a0e3114f954ca3f3",
+        "name": "",
+        "group": "53349609cb094d6c",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Start",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "",
+        "topicType": "str",
+        "x": 110,
+        "y": 460,
+        "wires": [
+            [
+                "226a2be6ae256ae3",
+                "0b1ca24e9ed6fb84"
+            ]
+        ]
+    },
+    {
+        "id": "226a2be6ae256ae3",
+        "type": "exec",
+        "z": "a0e3114f954ca3f3",
+        "command": "ROOT='/Users/yazanmatar/Desktop/Models/'; ls $ROOT",
+        "addpay": "",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "set_root",
+        "x": 260,
+        "y": 460,
+        "wires": [
+            [
+                "ed059f6824980d55"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "ed059f6824980d55",
+        "type": "function",
+        "z": "a0e3114f954ca3f3",
+        "name": "get_models",
+        "func": "const models = msg.payload.split(\"\\n\"); //array of model names\nmodels.pop();\nmodels.pop();\n\nlet LEN = models.length;\n\nlet paths = new Array(LEN).fill(global.get(\"ROOT\"));\nlet labeled_paths = {};\n\n/**\n * Dropdown options structuring [{modelname:modelpath}, ...]\n */\nmodels.forEach((model, i) => paths[i] += models[i]);\nmodels.forEach((model, i) => labeled_paths[model] = paths[i]);\n\nmsg.options = [labeled_paths]; //for Dropdown Node\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 460,
+        "wires": [
+            [
+                "cf39822502e5261b",
+                "3b0b52375d0d2f32"
+            ]
+        ]
+    },
+    {
+        "id": "cf39822502e5261b",
+        "type": "ui_dropdown",
+        "z": "a0e3114f954ca3f3",
+        "name": "",
+        "label": "Select Model",
+        "tooltip": "",
+        "place": "Model",
+        "group": "53349609cb094d6c",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 770,
+        "y": 400,
+        "wires": [
+            [
+                "07edf4156db97e03",
+                "279d7905768e40db"
+            ]
+        ]
+    },
+    {
+        "id": "07edf4156db97e03",
+        "type": "function",
+        "z": "a0e3114f954ca3f3",
+        "name": "set_ground_truth",
+        "func": "let ground_truth = msg.payload + '/ground_truth_label.csv'\nmsg.payload = ground_truth;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 970,
+        "y": 340,
+        "wires": [
+            [
+                "3bd930ece70d12c0"
+            ]
+        ]
+    },
+    {
+        "id": "279d7905768e40db",
+        "type": "function",
+        "z": "a0e3114f954ca3f3",
+        "name": "set_prediction",
+        "func": "let prediction = msg.payload + '/prediction_label.csv'\nmsg.payload = prediction;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 960,
+        "y": 460,
+        "wires": [
+            [
+                "3b67bfa5430a205a"
+            ]
+        ]
+    },
+    {
+        "id": "3b0b52375d0d2f32",
+        "type": "function",
+        "z": "a0e3114f954ca3f3",
+        "name": "set_timestamps",
+        "func": "let timestamps = global.get(\"ROOT\") + '/timestamps.csv'\nmsg.payload = timestamps;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 960,
+        "y": 540,
+        "wires": [
+            [
+                "8144e5a7ca866306"
+            ]
+        ]
+    },
+    {
+        "id": "e8c5139e4104b8dd",
+        "type": "comment",
+        "z": "a0e3114f954ca3f3",
+        "name": "Change root directory in both \"set__root\" nodes",
+        "info": "",
+        "x": 300,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "0b1ca24e9ed6fb84",
+        "type": "function",
+        "z": "a0e3114f954ca3f3",
+        "name": "set_root",
+        "func": "// Change root directory\nconst ROOT = '/Users/yazanmatar/Desktop/Models/';\nglobal.set(\"ROOT\", ROOT);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 540,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c720dca2f9eb43f3",
+        "type": "comment",
+        "z": "a0e3114f954ca3f3",
+        "name": "/path/to/models_(ground_truth_and_prediction)",
+        "info": "",
+        "x": 300,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "53349609cb094d6c",
+        "type": "ui_group",
+        "name": "Final Chart",
+        "tab": "f535ecce5bdd38ab",
+        "order": 2,
+        "disp": true,
+        "width": "15",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "f535ecce5bdd38ab",
+        "type": "ui_tab",
+        "name": "GT and Prediction Graph",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    }
+]
